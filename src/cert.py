@@ -10,16 +10,28 @@ class CERTDatasetVersion(str, Enum):
     cert_3_2 = '3.2'
 
 
-def _get_dataset_path(version: CERTDatasetVersion) -> str:
-    return f'../data/r{version.value}/email.csv'
+class CERTDataType(str, Enum):
+    device = 'device'
+    email = 'email'
+    http = 'http'
+    logon = 'logon'
+    psychometric = 'psychometric'
+    ldap = 'ldap'
 
 
-def get_cert_dataset_graph(
+def _get_dataset_path(version: CERTDatasetVersion, data_type: CERTDataType) -> str:
+    if data_type == CERTDataType.ldap:
+        return f'../data/r{version.value}/LDAP/2009-12.csv'  # FIXME
+    return f'../data/r{version.value}/{data_type.value}.csv'
+
+
+def load_dataframe(
+    data_type: CERTDataType,
     version: CERTDatasetVersion = CERTDatasetVersion.cert_3_2,
     date_from: date | datetime = None,
     date_to: date | datetime = None,
-) -> nx.Graph:
-    path = open(_get_dataset_path(version))
+) -> pd.DataFrame:
+    path = open(_get_dataset_path(version, data_type))
     df = pd.read_csv(path)
 
     def date_filter(row):
@@ -32,6 +44,16 @@ def get_cert_dataset_graph(
 
     if date_from or date_to:
         df = df[df.apply(date_filter, axis=1)]
+
+    return df
+
+
+def get_cert_dataset_graph(
+    version: CERTDatasetVersion = CERTDatasetVersion.cert_3_2,
+    date_from: date | datetime = None,
+    date_to: date | datetime = None,
+) -> nx.Graph:
+    df = pd.read_csv(load_dataframe(version, date_from, date_to))
 
     connections = defaultdict(int)
 
