@@ -2,6 +2,8 @@ from collections import defaultdict
 from datetime import date, datetime
 from enum import Enum
 
+import os
+
 import networkx as nx
 import pandas as pd
 
@@ -25,11 +27,26 @@ def _get_dataset_path(version: CERTDatasetVersion, data_type: CERTDataType) -> s
     return f'../data/r{version.value}/{data_type.value}.csv'
 
 
+def load_cert_dataset_users_dataframe(version: CERTDatasetVersion) -> pd.DataFrame:
+    path = f'../data/r{version.value}/LDAP/'
+    filenames = os.listdir(path)
+
+    return (
+        pd.concat(
+            [
+                pd.read_csv(f'{path}/{filename}')
+                for filename in filenames
+            ],
+        )
+        .drop_duplicates()
+    )
+
+
 def load_dataframe(
     data_type: CERTDataType,
     version: CERTDatasetVersion = CERTDatasetVersion.cert_3_2,
-    date_from: date | datetime = None,
-    date_to: date | datetime = None,
+    date_from: date | datetime | None = None,
+    date_to: date | datetime | None = None,
 ) -> pd.DataFrame:
     path = open(_get_dataset_path(version, data_type))
     df = pd.read_csv(path)
