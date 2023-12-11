@@ -19,6 +19,7 @@ class CERTDataType(str, Enum):
     logon = 'logon'
     psychometric = 'psychometric'
     ldap = 'ldap'
+    file = 'file'
 
 
 def _get_dataset_path(version: CERTDatasetVersion, data_type: CERTDataType) -> str:

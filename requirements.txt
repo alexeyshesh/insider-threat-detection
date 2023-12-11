@@ -1,0 +1,7 @@
+sklearn
+numpy
+networkx
+cdlib
+pandas
+ipython
+pydantic
